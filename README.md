@@ -1,18 +1,20 @@
-# Prowl GitHub Pages site
+# Prowl
 
-Static landing page and release download for Prowl Forge 1.8.9. The site includes the v0.1.41 JAR in `public/downloads/` and deploys through GitHub Pages using `.github/workflows/pages.yml`.
+Prowl is a Bed Wars roster and tab overlay for Minecraft Forge 1.8.9.
 
-## Publish with GitHub Pages
+## Documentation
 
-1. Create a **public** GitHub repository for the site and upload the contents of this folder to its `main` branch.
-2. In the repository, open **Settings → Pages** and set **Build and deployment → Source** to **GitHub Actions**.
-3. Push to `main`, or run **Deploy Prowl site** from the **Actions** tab. The workflow publishes the site and reports its URL.
+Read the [Prowl documentation](https://themeat1.github.io/Prowl/docs.html) for the roster flow, Hypixel stats lookup, Urchin tag lookup, caching, and current limitations.
 
-The download button points to the bundled JAR. When releasing a new version, replace the JAR in `public/downloads/` and update the version text and filename in `public/index.html`.
+## Download
 
-## Before sharing
+The current release is available from the [Prowl website](https://themeat1.github.io/Prowl/).
 
-- This site repository contains the release JAR, not the source project or any personal configuration files.
-- Do not upload `prowl.properties`, stats caches, API keys, or other local configuration.
-- Prowl currently has a Hypixel API-key field. Hypixel's published policy says API keys should not be entered into third-party mods; the site calls this out and links to the policy. Review the current policy before distributing or using API-backed features.
-- The page and mod are independent projects and are not affiliated with Hypixel or Mojang.
+## Release contents
+
+This public repository contains the website and release JAR only. It does not contain the mod source project, local settings, cached player data, or API keys.
+
+**API key notice:** Hypixel's current [API policy](https://developer.hypixel.net/policies/) says not to share API keys with third-party mods, including publicly available mods. Prowl v0.1.41 currently has a Hypixel key field; do not enter a Hypixel key into Prowl. The docs explain the existing lookup implementation and this limitation.
+
+Prowl is an independent project and is not affiliated with or endorsed by Hypixel or Mojang.
+
