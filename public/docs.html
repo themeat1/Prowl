@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101317">
+  <meta name="description" content="How Prowl collects a Bed Wars roster, looks up stats, and checks Urchin tags.">
+  <title>Documentation — Prowl</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="docs.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="index.html" aria-label="Prowl home"><span class="brand-mark">P</span><span>prowl<span class="brand-period">.</span></span></a>
+    <nav aria-label="Main navigation">
+      <a href="index.html#features">Features</a>
+      <a href="docs.html" aria-current="page">Docs</a>
+      <a href="index.html#install">Install</a>
+      <a class="nav-download" href="downloads/Prowl-Forge-1.8.9-v0.1.41.jar" download>Download <span aria-hidden="true">↗</span></a>
+    </nav>
+  </header>
+
+  <main class="docs-wrap">
+    <div class="docs-heading">
+      <p class="eyebrow">PROWL / DOCUMENTATION</p>
+      <h1>How lookups<br><span>work.</span></h1>
+      <p class="docs-lede">A technical guide to the roster, Bed Wars stats, and Urchin tag indicators in Prowl Forge 1.8.9 v0.1.41.</p>
+    </div>
+
+    <div class="docs-layout">
+      <aside class="docs-sidebar" aria-label="Documentation sections">
+        <p>ON THIS PAGE</p>
+        <a href="#roster">Roster sources</a>
+        <a href="#hypixel">Hypixel stats</a>
+        <a href="#urchin">Urchin tags</a>
+        <a href="#cache">Cache and request pacing</a>
+        <a href="#privacy">Keys and policy</a>
+        <a href="#troubleshooting">Troubleshooting</a>
+      </aside>
+
+      <article class="docs-content">
+        <section id="roster">
+          <p class="doc-kicker">01 / INPUT</p>
+          <h2>Where the player list comes from</h2>
+          <p>Prowl keeps a roster of names it is meant to display and check. In a Bed Wars waiting lobby or active match, <code>/pr who</code> reads the names supplied by the server's <code>/who</code> response. During a match it can also use the current Minecraft tab entries. <code>/pr add &lt;name&gt;</code> adds one chosen player, including someone who is not currently in your tab list.</p>
+          <p>In Bed Wars waiting lobbies, ordinary public player chat can add the speaker to the roster. Party, guild, officer, and other non-player chat lines are ignored. In a waiting lobby, the current player list is not automatically treated as a game roster. Roster entries are removed when the game ends or the server sends a transfer message; <code>/pr clear</code> clears the tracked roster.</p>
+          <div class="callout callout-info"><b>Identity matching</b><span>When Minecraft already provides a player's UUID, Prowl uses it directly. If a manually added name has no live tab entry, Prowl asks Mojang's profile service to resolve the name to a UUID and canonical capitalization.</span></div>
+        </section>
+
+        <section id="hypixel">
+          <p class="doc-kicker">02 / BED WARS DATA</p>
+          <h2>Hypixel stats lookup</h2>
+          <p>For each roster player whose cached data has expired, Prowl queues a player-profile request to Hypixel. It sends the player's UUID without hyphens and supplies the API key in the <code>API-Key</code> request header.</p>
+          <div class="endpoint"><span>GET</span><code>https://api.hypixel.net/v2/player?uuid=&lt;uuid&gt;</code></div>
+          <p>The response's <code>player.stats.Bedwars</code> record provides the values shown in the tab:</p>
+          <ul>
+            <li><b>Level:</b> derived from Bed Wars <code>Experience</code>, using the prestige XP thresholds.</li>
+            <li><b>FKDR:</b> <code>final_kills_bedwars ÷ final_deaths_bedwars</code>.</li>
+            <li><b>WLR:</b> <code>wins_bedwars ÷ losses_bedwars</code>.</li>
+            <li><b>WS:</b> the Bed Wars <code>winstreak</code> field.</li>
+            <li><b>Rank:</b> rank fields from the player profile, including the player's configured MVP+ color.</li>
+          </ul>
+          <p>If a denominator is zero, Prowl displays the available numerator as the ratio. A missing Bed Wars record is shown as no record. A profile response without a player object is treated as hidden/nicked, so Prowl does not try to identify a nicked account.</p>
+          <p>Names without a known UUID are resolved with Mojang's profile endpoint:</p>
+          <div class="endpoint"><span>GET</span><code>https://api.mojang.com/users/profiles/minecraft/&lt;name&gt;</code></div>
+          <p>Player-head textures are fetched separately from Mojang's session profile and texture service. A skin failure does not block the stats row.</p>
+        </section>
+
+        <section id="urchin">
+          <p class="doc-kicker">03 / TAG DATA</p>
+          <h2>Urchin tag lookup</h2>
+          <p>Urchin checks only the current Prowl roster. Prowl gathers UUIDs from Minecraft's player list or its name-to-UUID cache, then sends all uncached UUIDs together in one JSON request:</p>
+          <div class="endpoint"><span>POST</span><code>https://api.urchin.gg/v3/players</code></div>
+          <pre><code>{ "uuids": ["uuid-with-hyphens", "another-uuid"] }</code></pre>
+          <p>The request uses <code>Content-Type: application/json</code>, <code>Accept: application/json</code>, and the Urchin API key in the <code>X-API-Key</code> header. The response is read from its <code>players</code> object, keyed by UUID. For each returned tag, Prowl reads <code>tag_type</code> (or <code>type</code>) and the optional <code>reason</code>.</p>
+          <p>Those fields determine the tag icons in the Urchin column. The tag-type matcher recognizes sniper, confirmed, caution, closet/closer, blatant, legit-sniper, and possible-sniper labels. Prowl also prints a chat notice for tagged players with the returned tag type and reason, for example <code>Player tagged for Confirmed Cheater (legit scaffold)</code>. A known untagged result gets a green check; a failed or unknown lookup is not represented as an untagged result.</p>
+          <div class="callout callout-info"><b>One batch for a roster</b><span>The Urchin request contains multiple players when possible, rather than making a separate request for every name. New results are cached for 20 minutes.</span></div>
+        </section>
+
+        <section id="cache">
+          <p class="doc-kicker">04 / LOAD MANAGEMENT</p>
+          <h2>Cache and request pacing</h2>
+          <div class="data-grid">
+            <div><b>Hypixel stats</b><span>Cached locally for 24 hours. Saved in <code>config/prowl-stats.properties</code>.</span></div>
+            <div><b>Hypixel request spacing</b><span>Starts at a 1.2 second minimum gap. When rate-limit headers are present, Prowl adjusts the gap based on the reported limit, remaining budget, and reset time.</span></div>
+            <div><b>429 handling</b><span>On HTTP 429 or a nearly exhausted budget, Prowl pauses requests using <code>Retry-After</code> or the reported reset time and persists the pause in <code>config/prowl-ratelimit.properties</code>.</span></div>
+            <div><b>Urchin tags</b><span>Cached locally in memory for 20 minutes. Successful batches are separated by at least 2.5 seconds; other errors retry after 30 seconds and HTTP 429 retries after 5 minutes.</span></div>
+          </div>
+          <p>Clearing the Prowl roster also clears its local stats cache. A cache hit avoids another Hypixel request until it expires. The rate-limit interval is adaptive, so 1.2 seconds is the starting pace, not a promise that every request will always run at that speed.</p>
+        </section>
+
+        <section id="privacy">
+          <p class="doc-kicker">05 / IMPORTANT</p>
+          <h2>API keys and policy</h2>
+          <div class="callout callout-warning"><b>Do not enter a Hypixel API key into Prowl v0.1.41.</b><span>Hypixel's current policy says not to share API keys with third-party mods, including publicly available mods. Prowl v0.1.41 includes a key field and sends that key to Hypixel, so its current stats lookup design conflicts with this policy. Review the <a href="https://developer.hypixel.net/policies/" target="_blank" rel="noopener noreferrer">official Hypixel API policy</a>. This documentation describes the shipped behavior; it is not an endorsement to enter or share a key.</span></div>
+          <p>The Urchin key is stored in Prowl's local settings file, <code>config/prowl.properties</code>, in plain text. Keep that file private and never include it in screenshots, bug reports, or uploads. The public repository contains the website and release JAR only; it does not contain mod source code, personal keys, or local cache/configuration files.</p>
+        </section>
+
+        <section id="troubleshooting">
+          <p class="doc-kicker">06 / DIAGNOSTICS</p>
+          <h2>When a value is missing</h2>
+          <dl class="troubleshooting">
+            <dt>No stats appear</dt><dd>Check <code>/pr status</code> for roster size, key state, queue status, or an active Hypixel cooldown. A fresh cached record will not be requested again until the cache expires.</dd>
+            <dt>“No record” appears</dt><dd>The profile resolved, but the API response had no Bed Wars stats record. It can also mean the player has not established a Bed Wars profile.</dd>
+            <dt>A nicked player has no stats</dt><dd>Hypixel does not return a usable public player profile for that nick. Prowl leaves the stats unavailable instead of guessing the underlying identity.</dd>
+            <dt>Urchin shows a dash or ellipsis</dt><dd>A dash means the lookup is unknown or did not return a usable record; an ellipsis means the lookup has not completed yet. Neither means “confirmed untagged.”</dd>
+            <dt>HTTP 429 appears</dt><dd>Hypixel has applied a rate limit. Prowl honors the response's retry/reset timing; repeatedly clearing the roster does not increase the allowed API budget.</dd>
+          </dl>
+        </section>
+
+        <p class="docs-updated">Prowl Forge 1.8.9 · v0.1.41 · Independent project, not affiliated with Hypixel or Mojang.</p>
+      </article>
+    </div>
+  </main>
+
+  <footer class="site-footer wrap"><a class="brand footer-brand" href="index.html"><span class="brand-mark">P</span><span>prowl<span class="brand-period">.</span></span></a><p>Independent community project. Not affiliated with or endorsed by Hypixel or Mojang.</p><span class="footer-version">FORGE 1.8.9 · v0.1.41</span></footer>
+</body>
+</html>
+
