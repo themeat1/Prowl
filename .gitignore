@@ -1,0 +1,8 @@
+*.properties
+*.key
+*.token
+/build/
+/run/
+.gradle/
+Thumbs.db
+.DS_Store

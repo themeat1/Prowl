@@ -1,0 +1,9 @@
+Third-party asset notices
+
+Twemoji heart artwork
+- Asset: the red heart emoji used in the Urchin icon atlas.
+- Source: Twemoji, https://github.com/twitter/twemoji
+- License: Creative Commons Attribution 4.0 International (CC BY 4.0), https://creativecommons.org/licenses/by/4.0/
+- The artwork was converted and resized for use in the Prowl texture atlas.
+
+The other Urchin icons in the atlas were supplied by the user.
