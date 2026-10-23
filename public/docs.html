@@ -24,7 +24,7 @@
     <div class="docs-heading">
       <p class="eyebrow">PROWL / DOCUMENTATION</p>
       <h1>How lookups<br><span>work.</span></h1>
-      <p class="docs-lede">A technical guide to the roster, Bed Wars stats, and Urchin tag indicators in Prowl Forge 1.8.9 v0.1.46.</p>
+      <p class="docs-lede">A technical guide to the roster, Bed Wars stats, and Urchin tag indicators in Prowl Forge 1.8.9 v0.1.47.</p>
     </div>
 
     <div class="docs-layout">
@@ -92,16 +92,17 @@
           <div class="data-grid">
             <div><b>Hypixel stats</b><span>Cached locally for 20 minutes. Saved in <code>config/prowl-stats.properties</code>. Expired entries are fetched again when Prowl next checks that roster.</span></div>
             <div><b>Hypixel request spacing</b><span>Uses a 2.5 second minimum gap, adjusted when Hypixel reports a stricter budget. On HTTP 429, Prowl follows the server's retry/reset window and adds no extra five-minute delay.</span></div>
-            <div><b>429 handling</b><span>On HTTP 429 or a nearly exhausted budget, Prowl pauses requests using <code>Retry-After</code> or the reported reset time and persists the pause in <code>config/prowl-ratelimit.properties</code>.</span></div>
+            <div><b>429 handling</b><span>On HTTP 429 or a nearly exhausted budget, Prowl pauses requests using <code>Retry-After</code> or the reported reset time and stores the pause against a one-way fingerprint of the configured API key in <code>config/prowl-ratelimit.properties</code>. A changed key does not inherit another key's saved pause.</span></div>
             <div><b>Urchin tags</b><span>Cached locally in memory for 20 minutes. Successful batches are separated by at least 2.5 seconds; other errors retry after 30 seconds.</span></div>
           </div>
           <p><code>/pr clear</code> removes the displayed roster while keeping saved stats, so a cache hit avoids another Hypixel request until it expires. The normal Minecraft player-list footer supplies the live kills, final kills, and beds-broken counters; scoreboard values only fill a field the footer omits.</p>
+          <p>Queued player lookups are deduplicated and capped. During a server-provided cooldown, Prowl does not add more work to the queue; it discards stale requests and rebuilds from the current roster after the pause.</p>
         </section>
 
         <section id="privacy">
           <p class="doc-kicker">06 / IMPORTANT</p>
           <h2>API keys and policy</h2>
-          <div class="callout callout-warning"><b>Do not enter a Hypixel API key into Prowl v0.1.46.</b><span>Hypixel's current policy says not to share API keys with third-party mods, including publicly available mods. Prowl v0.1.46 includes a key field and sends that key to Hypixel, so its current stats lookup design conflicts with this policy. Review the <a href="https://developer.hypixel.net/policies/" target="_blank" rel="noopener noreferrer">official Hypixel API policy</a>. This documentation describes the shipped behavior; it is not an endorsement to enter or share a key.</span></div>
+          <div class="callout callout-warning"><b>Do not enter a Hypixel API key into Prowl v0.1.47.</b><span>Hypixel's current policy says not to share API keys with third-party mods, including publicly available mods. Prowl v0.1.47 includes a key field and sends that key to Hypixel, so its current stats lookup design conflicts with this policy. Review the <a href="https://developer.hypixel.net/policies/" target="_blank" rel="noopener noreferrer">official Hypixel API policy</a>. This documentation describes the shipped behavior; it is not an endorsement to enter or share a key.</span></div>
           <p>The Urchin key is stored in Prowl's local settings file, <code>config/prowl.properties</code>, in plain text. Keep that file private and never include it in screenshots, bug reports, or uploads. The public repository contains the website and release JAR only; it does not contain mod source code, personal keys, or local cache/configuration files.</p>
         </section>
 
@@ -118,11 +119,12 @@
         </section>
 
         <div class="callout callout-warning beta-notice"><b>Beta version</b><span>Prowl is still in beta, so bugs may happen. The rate-limit values and request pacing are still being tested and may change in future versions.</span></div>
-        <p class="docs-updated">Prowl Forge 1.8.9 · v0.1.46 · Independent project, not affiliated with Hypixel or Mojang.</p>
+        <p class="docs-updated">Prowl Forge 1.8.9 · v0.1.47 · Independent project, not affiliated with Hypixel or Mojang.</p>
       </article>
     </div>
   </main>
 
-  <footer class="site-footer wrap"><a class="brand footer-brand" href="index.html"><span class="brand-mark">P</span><span>prowl<span class="brand-period">.</span></span></a><p>Independent community project. Not affiliated with or endorsed by Hypixel or Mojang.</p><span class="footer-version">FORGE 1.8.9 · v0.1.46</span></footer>
+  <footer class="site-footer wrap"><a class="brand footer-brand" href="index.html"><span class="brand-mark">P</span><span>prowl<span class="brand-period">.</span></span></a><p>Independent community project. Not affiliated with or endorsed by Hypixel or Mojang.</p><span class="footer-version">FORGE 1.8.9 · v0.1.47</span></footer>
 </body>
 </html>
+
