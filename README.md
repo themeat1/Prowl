@@ -14,7 +14,7 @@ The current release is available from the [Prowl website](https://themeat1.githu
 
 This public repository contains the website and release JAR only. It does not contain the mod source project, local settings, cached player data, or API keys.
 
-**API key notice:** Hypixel's current [API policy](https://developer.hypixel.net/policies/) says not to share API keys with third-party mods, including publicly available mods. Prowl v0.1.42 currently has a Hypixel key field; do not enter a Hypixel key into Prowl. The docs explain the existing lookup implementation and this limitation.
+**API key notice:** Hypixel's current [API policy](https://developer.hypixel.net/policies/) says not to share API keys with third-party mods, including publicly available mods. Prowl v0.1.43 currently has a Hypixel key field; do not enter a Hypixel key into Prowl. The docs explain the existing lookup implementation and this limitation.
 
 Prowl has been tested and verified with Lunar Client's Forge 1.8.9 profile. The documentation labels this release as beta; bug reports and request-pacing behavior are still being evaluated.
 
