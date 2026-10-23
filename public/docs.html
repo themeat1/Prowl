@@ -70,7 +70,7 @@
         <section id="urchin">
           <p class="doc-kicker">03 / TAG DATA</p>
           <h2>Urchin tag lookup</h2>
-          <p>Urchin checks only the current Prowl roster. Prowl gathers UUIDs from Minecraft's player list or its name-to-UUID cache, then sends all uncached UUIDs together in one JSON request:</p>
+          <p>Automatic Urchin checks cover the current Prowl roster. Prowl gathers UUIDs from Minecraft's player list or its name-to-UUID cache, then sends uncached UUIDs together in one JSON request. The manual command can also check a single name outside the roster:</p>
           <div class="endpoint"><span>POST</span><code>https://api.urchin.gg/v3/players</code></div>
           <pre><code>{ "uuids": ["uuid-with-hyphens", "another-uuid"] }</code></pre>
           <p>The request uses <code>Content-Type: application/json</code>, <code>Accept: application/json</code>, and the Urchin API key in the <code>X-API-Key</code> header. The response is read from its <code>players</code> object, keyed by UUID. For each returned tag, Prowl reads <code>tag_type</code> (or <code>type</code>) and the optional <code>reason</code>.</p>
@@ -95,7 +95,7 @@
             <div><b>429 handling</b><span>On HTTP 429 or a nearly exhausted budget, Prowl pauses requests using <code>Retry-After</code> or the reported reset time and persists the pause in <code>config/prowl-ratelimit.properties</code>.</span></div>
             <div><b>Urchin tags</b><span>Cached locally in memory for 20 minutes. Successful batches are separated by at least 2.5 seconds; other errors retry after 30 seconds and HTTP 429 retries after 5 minutes.</span></div>
           </div>
-          <p>Clearing the Prowl roster also clears its local stats cache. A cache hit avoids another Hypixel request until it expires. The rate-limit interval is adaptive, so 1.2 seconds is the starting pace, not a promise that every request will always run at that speed.</p>
+          <p><code>/pr clear</code> removes the displayed roster while keeping saved stats, so a cache hit avoids another Hypixel request until it expires. The rate-limit interval is adaptive, so 1.2 seconds is the starting pace, not a promise that every request will always run at that speed.</p>
         </section>
 
         <section id="privacy">
