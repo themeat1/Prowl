@@ -91,10 +91,11 @@
           <h2>Cache and request pacing</h2>
           <div class="data-grid">
             <div><b>Hypixel stats</b><span>Cached locally for 20 minutes. Saved in <code>config/prowl-stats.properties</code>. Expired entries are fetched again when Prowl next checks that roster.</span></div>
-            <div><b>Hypixel request spacing</b><span>Uses a 2.5 second minimum gap, adjusted when Hypixel reports a stricter budget. On HTTP 429, Prowl follows the server's retry/reset window and adds no extra five-minute delay.</span></div>
+            <div><b>Hypixel request spacing</b><span>Uses a 0.5 second minimum gap, adjusted when Hypixel reports a stricter budget. On HTTP 429, Prowl follows the server's retry/reset window and adds no extra five-minute delay.</span></div>
             <div><b>429 handling</b><span>On HTTP 429 or a nearly exhausted budget, Prowl pauses requests using <code>Retry-After</code> or the reported reset time and stores the pause against a one-way fingerprint of the configured API key in <code>config/prowl-ratelimit.properties</code>. A changed key does not inherit another key's saved pause.</span></div>
             <div><b>Urchin tags</b><span>Cached locally in memory for 20 minutes. Successful batches are separated by at least 2.5 seconds; other errors retry after 30 seconds.</span></div>
           </div>
+          <div class="callout callout-warning"><b>Stay under the Hypixel API limit</b><span>Do not send more than 300 requests in any five-minute window. Going over the limit can trigger HTTP 429 and a server-directed cooldown. Requests from other apps using the same API key count toward the total; clearing the Prowl roster does not reset the API budget.</span></div>
           <p><code>/pr clear</code> removes the displayed roster while keeping saved stats, so a cache hit avoids another Hypixel request until it expires. The normal Minecraft player-list footer supplies the live kills, final kills, and beds-broken counters; scoreboard values only fill a field the footer omits.</p>
           <p>Queued player lookups are deduplicated and capped. During a server-provided cooldown, Prowl does not add more work to the queue; it discards stale requests and rebuilds from the current roster after the pause.</p>
         </section>
